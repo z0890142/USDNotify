@@ -7,6 +7,8 @@ import (
 	//前面加 _ 是為了只讓他執行init
 	"USDNotify/model"
 
+	_ "github.com/go-sql-driver/mysql" //前面加 _ 是為了只讓他執行init
+
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
@@ -31,27 +33,29 @@ func CreateDbConn(driveName string, dataSourceName string, Log *logrus.Entry) er
 	return err
 }
 
-func GetForeignCurrencyList() (list []string, err error) {
-	sqlString := "select Name from ForeignCurrency"
+func GetForeignCurrencyList() (list []int, nameList []string, err error) {
+	sqlString := "select SN,Name from ForeignCurrency"
 	rows, err := db.Query(sqlString)
 	if err != nil {
 		err = fmt.Errorf("Get CurrentPrice : %v", err)
 		return
 	}
 	for rows.Next() {
+		var tmpSN int
 		var tmpName string
-		rows.Scan(&tmpName)
-		list = append(list, tmpName)
+		rows.Scan(&tmpSN, &tmpName)
+		list = append(list, tmpSN)
+		nameList = append(nameList, tmpName)
 	}
 
 	return
 }
 
-func GetForeignCurrencyRecord(name string) (recordList model.ForeignCurrencyRecord, err error) {
-	sqlString := "select Name,15_Lowest,15_Heigest,3Month_Lowest,3Month_Heigest,6Month_Lowest,6Month_Heigest," +
+func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, err error) {
+	sqlString := "select 15_Lowest,15_Heigest,3Month_Lowest,3Month_Heigest,6Month_Lowest,6Month_Heigest," +
 		"1Year_Lowest,1Year_Heigest,3Year_Lowest,3Year_Heigest,5Year_Lowest,5Year_Heigest from ForeignCurrencyRecord " +
-		"where Name=?"
-	db.QueryRow(sqlString, name).Scan(
+		"where SN=?"
+	db.QueryRow(sqlString, SN).Scan(
 		&recordList.Lowest,
 		&recordList.Heigest,
 		&recordList.ThirdMonth_Lowest,

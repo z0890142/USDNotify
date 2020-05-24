@@ -1,4 +1,4 @@
-package service
+package foreignCurrency
 
 import (
 	"USDNotify/helper/Comman"
@@ -38,11 +38,11 @@ type ForeignCurrencyRecord struct {
 }
 
 var Log *logrus.Entry
-var ForeignCurrencyMap map[string]*cron.Cron
+var ForeignCurrencyMap map[int]*cron.Cron
 
 func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
-	ForeignCurrencyMap = make(map[string]*cron.Cron)
+	ForeignCurrencyMap = make(map[int]*cron.Cron)
 }
 
 func (f *ForeignCurrency) Run() {
@@ -80,23 +80,23 @@ func (f *ForeignCurrency) Run() {
 }
 
 func Init() {
-	currencyList, err := DB.GetForeignCurrencyList()
+	currencyList, nameList, err := DB.GetForeignCurrencyList()
 	if err != nil {
 		Log.WithFields(logrus.Fields{
 			"error": err,
 		}).Error("GetForeignCurrencyList Error")
 	}
-	for _, currency := range currencyList {
+	for index, currency := range currencyList {
 		record, err := DB.GetForeignCurrencyRecord(currency)
 		if err != nil {
 			Log.WithFields(logrus.Fields{
 				"error": err,
 			}).Error("GetForeignCurrencyRecord Error")
 		}
-		_Log, _ := Comman.LogInit(currency, "USDNotify", logrus.DebugLevel)
+		_Log, _ := Comman.LogInit(nameList[index], "USDNotify", logrus.DebugLevel)
 
 		tmpForeignCurrency := &ForeignCurrency{
-			Name:             currency,
+			Name:             nameList[index],
 			Subscribe_Number: 0,
 			Log:              _Log,
 		}
@@ -115,8 +115,9 @@ func Init() {
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
 
 		ForeignCurrencyMap[currency] = cron.New()
-		ForeignCurrencyMap[currency].AddJob("* */10 * * * *", tmpForeignCurrency)
+		ForeignCurrencyMap[currency].AddJob("0 */10 * * * *", tmpForeignCurrency)
 		ForeignCurrencyMap[currency].AddFunc("0 0 17 * * *", tmpForeignCurrency.SaveTodayPrice)
+		ForeignCurrencyMap[currency].Start()
 	}
 
 }
@@ -172,7 +173,7 @@ func (f *ForeignCurrency) LowestHandler(sell float64) {
 		f.Lowest = sell
 		f.Today_Lowest = sell
 		msg = f.Name + "銀行賣價已達半個月內最低價"
-	} else if f.Today_Lowest > sell {
+	} else if f.Today_Lowest > sell || f.Today_Lowest == 0 {
 		f.Today_Lowest = sell
 	}
 
