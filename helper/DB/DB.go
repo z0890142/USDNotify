@@ -73,19 +73,19 @@ func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, e
 	return
 }
 
-func SaveTodayPrice(name string, sellPrice float64, buyInPrice float64) error {
+func SaveTodayPrice(SN int, sellPrice float64, buyInPrice float64) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("SaveTodaySellPrice : %v", err)
 	}
 	date := time.Now().In(time.FixedZone("CST", 28800)).Format("2006-01-02")
-	_, err = tx.Exec("insert into ForeignCurrencySellPrice(Name,Price,Date) values(?,?,?)",
-		name, sellPrice, date)
+	_, err = tx.Exec("insert into ForeignCurrencySellPrice(SN,Price,Date) values(?,?,?)",
+		SN, sellPrice, date)
 	if err != nil {
 		return fmt.Errorf("SaveTodaySellPrice : %v", err)
 	}
-	_, err = tx.Exec("insert into ForeignCurrencyBuyInPrice(Name,Price,Date) values(?,?,?)",
-		name, buyInPrice, date)
+	_, err = tx.Exec("insert into ForeignCurrencyBuyInPrice(SN,Price,Date) values(?,?,?)",
+		SN, buyInPrice, date)
 	if err != nil {
 		return fmt.Errorf("SaveTodayBuyInPrice : %v", err)
 	}
@@ -96,9 +96,9 @@ func SaveTodayPrice(name string, sellPrice float64, buyInPrice float64) error {
 	return nil
 }
 
-func GetSubscribeMember(name string) (userList []string, err error) {
-	sqlString := "select UserId from Subscribe where name=?"
-	rows, err := db.Query(sqlString, name)
+func GetSubscribeMember(SN int) (userList []string, err error) {
+	sqlString := "select UserId from Subscribe where SN=?"
+	rows, err := db.Query(sqlString, SN)
 	if err != nil {
 		return userList, fmt.Errorf("GetSubscribeMember : %v", err)
 	}
@@ -111,12 +111,21 @@ func GetSubscribeMember(name string) (userList []string, err error) {
 	return
 }
 
-func InsertSubscribeMember(name string, userID string) error {
-	sqlString := "insert into Subscribe(Name,UserId) values(?,?)"
-	_, err := db.Exec(sqlString, name, userID)
+func InsertSubscribeMember(Name string, userID string) error {
+	SN := GetSNByName(Name)
+	sqlString := "insert into Subscribe(SN,UserId) values(?,?)"
+	_, err := db.Exec(sqlString, SN, userID)
 	if err != nil {
 		return fmt.Errorf("InsertSubscribeMember : %v", err)
 	}
 	return nil
+
+}
+
+func GetSNByName(Name string) (SN int) {
+	sqlString := "select SN from ForeignCurrency where DisplayName like '%" + Name + "%'"
+	db.QueryRow(sqlString, Name).Scan(&SN)
+
+	return
 
 }

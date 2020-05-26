@@ -14,6 +14,7 @@ import (
 )
 
 type ForeignCurrency struct {
+	SN               int
 	Name             string
 	Subscribe_Number int
 	ForeignCurrencyRecord
@@ -96,7 +97,7 @@ func Init() {
 		_Log, _ := Comman.LogInit(nameList[index], "USDNotify", logrus.DebugLevel)
 
 		tmpForeignCurrency := &ForeignCurrency{
-			Name:             nameList[index],
+			SN:               currency,
 			Subscribe_Number: 0,
 			Log:              _Log,
 		}
@@ -123,7 +124,7 @@ func Init() {
 }
 
 func (f *ForeignCurrency) SaveTodayPrice() {
-	err := DB.SaveTodayPrice(f.Name, f.Today_Lowest, f.Today_Heigest)
+	err := DB.SaveTodayPrice(f.SN, f.Today_Lowest, f.Today_Heigest)
 	if err != nil {
 		f.Log.WithFields(logrus.Fields{
 			"Error": err,
@@ -181,7 +182,7 @@ func (f *ForeignCurrency) LowestHandler(sell float64) {
 		return
 	}
 
-	userList, err := DB.GetSubscribeMember(f.Name)
+	userList, err := DB.GetSubscribeMember(f.SN)
 	if err != nil {
 		f.Log.WithFields(logrus.Fields{
 			"Error": err,
@@ -243,7 +244,7 @@ func (f *ForeignCurrency) HeigestHandler(buyin float64) {
 		return
 	}
 
-	userList, err := DB.GetSubscribeMember(f.Name)
+	userList, err := DB.GetSubscribeMember(f.SN)
 	if err != nil {
 		f.Log.WithFields(logrus.Fields{
 			"Error": err,
