@@ -74,6 +74,12 @@ func (f *ForeignCurrency) Run() {
 
 		buyIn, _ := strconv.ParseFloat(buyInStr, 64)
 		sell, _ := strconv.ParseFloat(sellStr, 64)
+		Log.WithFields(logrus.Fields{
+			"buyInStr": buyInStr,
+			"sellStr":  sellStr,
+			"buyIn":    buyIn,
+			"sell":     sell,
+		}).Info("Price info")
 		f.LowestHandler(sell)
 		f.HeigestHandler(buyIn)
 	}
@@ -97,6 +103,7 @@ func Init() {
 		_Log, _ := Comman.LogInit(nameList[index], "USDNotify", logrus.DebugLevel)
 
 		tmpForeignCurrency := &ForeignCurrency{
+			Name:             nameList[index],
 			SN:               currency,
 			Subscribe_Number: 0,
 			Log:              _Log,
@@ -116,8 +123,8 @@ func Init() {
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
 
 		ForeignCurrencyMap[currency] = cron.New()
-		ForeignCurrencyMap[currency].AddJob("0 */10 * * * *", tmpForeignCurrency)
-		ForeignCurrencyMap[currency].AddFunc("0 0 17 * * *", tmpForeignCurrency.SaveTodayPrice)
+		ForeignCurrencyMap[currency].AddJob("0 */10 8-16 * * *", tmpForeignCurrency)
+		ForeignCurrencyMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
 		ForeignCurrencyMap[currency].Start()
 	}
 
