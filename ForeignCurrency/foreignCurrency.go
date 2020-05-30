@@ -123,7 +123,7 @@ func Init() {
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
 
 		ForeignCurrencyMap[currency] = cron.New()
-		ForeignCurrencyMap[currency].AddJob("0 */10 8-16 * * *", tmpForeignCurrency)
+		ForeignCurrencyMap[currency].AddJob("0 0/10 9-16 * * *", tmpForeignCurrency)
 		ForeignCurrencyMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
 		ForeignCurrencyMap[currency].Start()
 	}
