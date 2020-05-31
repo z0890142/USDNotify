@@ -39,6 +39,9 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					service.PushMessage(userID, "訂閱成功", Log)
+				} else {
+					service.GetNowPrice(message.Text)
+
 				}
 
 			}

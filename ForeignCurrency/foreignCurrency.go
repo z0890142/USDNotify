@@ -21,6 +21,8 @@ type ForeignCurrency struct {
 	Log           *logrus.Entry
 	Today_Lowest  float64
 	Today_Heigest float64
+	now_sell      float64
+	now_buyin     float64
 }
 
 type ForeignCurrencyRecord struct {
@@ -44,6 +46,7 @@ var ForeignCurrencyMap map[int]*cron.Cron
 func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
 	ForeignCurrencyMap = make(map[int]*cron.Cron)
+	service.SetForeignCurrencyMap(&ForeignCurrencyMap)
 }
 
 func (f *ForeignCurrency) Run() {
@@ -80,6 +83,8 @@ func (f *ForeignCurrency) Run() {
 			"buyIn":    buyIn,
 			"sell":     sell,
 		}).Info("Price info")
+		f.now_sell = sell
+		f.now_buyIn = buyIn
 		f.LowestHandler(sell)
 		f.HeigestHandler(buyIn)
 	}

@@ -1,0 +1,1 @@
+{"ExtSystems":[{"Service":"瓦斯雲","Devices":[{"Category":"gasMeter","Device_id":"0988888","Time":"2019-07-15T13:13:00+8:00"}]}]}
