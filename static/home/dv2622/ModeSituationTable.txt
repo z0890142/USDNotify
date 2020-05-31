@@ -1,1 +1,0 @@
-{"Account":"","Detail":[{"Description":"回家模式","CommandList":[{"DeviceID":"12368092894","APIKEY":"PKU21HCFB7I3OAAW6T","Command":["71","00","0001","dv2622"]}],"MonitorDetail":null},{"Description":"外出模式","CommandList":[{"DeviceID":"12368092894","APIKEY":"PKU21HCFB7I3OAAW6T","Command":["71","00","0000","dv2622"]}],"MonitorDetail":null}]}

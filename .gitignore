@@ -3,3 +3,4 @@
 # 忽略所有附檔名是 .log 的檔案
 *.log
 config/*
+static/*

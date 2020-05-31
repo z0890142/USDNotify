@@ -1,1 +1,0 @@
-{"Account":"dv2622","Detail":[{"DeviceID":"14439262387","APIKEY":"DKTZF33YHZZESWS0YR","Description":"家電測試","Type":"91"}]}
