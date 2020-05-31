@@ -51,31 +51,75 @@ func init() {
 	ForeignCurrencyCronMap = make(map[int]*cron.Cron)
 }
 
+//from fubon
+// func (f *ForeignCurrency) Run() {
+
+// 	soup.Headers = map[string]string{
+// 		"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+// 	}
+
+// 	source, err := soup.Get("https://www.fubon.com/Fubon_Portal/banking/Personal/deposit/exchange_rate/exchange_rate1.jsp")
+// 	if err != nil {
+
+// 	}
+// 	doc := soup.HTMLParse(source)
+// 	for _, root := range doc.Find("table", "class", "rate-table").FindAll("tr") {
+
+// 		tdArray := root.FindAll("td")
+// 		if len(tdArray) == 0 {
+// 			continue
+// 		}
+// 		name := tdArray[1].Find("div").Text()
+// 		if !strings.Contains(name, f.Name) {
+// 			continue
+// 		}
+
+// 		priceDiv := tdArray[3].Find("div")
+// 		buyInStr := strings.TrimSpace(priceDiv.Text())
+// 		sellStr := strings.TrimSpace(priceDiv.Find("br").FindNextSibling().NodeValue)
+
+// 		buyIn, _ := strconv.ParseFloat(buyInStr, 64)
+// 		sell, _ := strconv.ParseFloat(sellStr, 64)
+// 		Log.WithFields(logrus.Fields{
+// 			"buyInStr": buyInStr,
+// 			"sellStr":  sellStr,
+// 			"buyIn":    buyIn,
+// 			"sell":     sell,
+// 		}).Info("Price info")
+// 		f.Now_sell = sell
+// 		f.Now_buyIn = buyIn
+// 		f.LowestHandler(sell)
+// 		f.HeigestHandler(buyIn)
+// 	}
+
+// }
+
 func (f *ForeignCurrency) Run() {
 
 	soup.Headers = map[string]string{
 		"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
 	}
 
-	source, err := soup.Get("https://www.fubon.com/Fubon_Portal/banking/Personal/deposit/exchange_rate/exchange_rate1.jsp")
+	source, err := soup.Get("https://rate.bot.com.tw/xrt?Lang=zh-TW")
 	if err != nil {
 
 	}
 	doc := soup.HTMLParse(source)
-	for _, root := range doc.Find("table", "class", "rate-table").FindAll("tr") {
+	for _, root := range doc.Find("table", "title", "牌告匯率").FindAll("tr") {
 
 		tdArray := root.FindAll("td")
 		if len(tdArray) == 0 {
 			continue
 		}
-		name := tdArray[1].Find("div").Text()
+		name := tdArray[0].Find("div", "class", "print_show").Text()
+		name = strings.Replace(name, " ", "", -1)
+		name = strings.Replace(name, "\n", "", -1)
+
 		if !strings.Contains(name, f.Name) {
 			continue
 		}
-
-		priceDiv := tdArray[3].Find("div")
-		buyInStr := strings.TrimSpace(priceDiv.Text())
-		sellStr := strings.TrimSpace(priceDiv.Find("br").FindNextSibling().NodeValue)
+		buyInStr := tdArray[3].Text()
+		sellStr := tdArray[4].Text()
 
 		buyIn, _ := strconv.ParseFloat(buyInStr, 64)
 		sell, _ := strconv.ParseFloat(sellStr, 64)
@@ -260,12 +304,12 @@ func Init() {
 		tmpForeignCurrency.ThirdMonth_Lowest = record.ThirdMonth_Lowest
 		tmpForeignCurrency.FiveYear_Heigest = record.FiveYear_Heigest
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
-		
+
 		ForeignCurrencyCronMap[currency] = cron.New()
 		ForeignCurrencyCronMap[currency].AddJob("0 0/10 9-16 * * *", tmpForeignCurrency)
 		ForeignCurrencyCronMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
 		ForeignCurrencyCronMap[currency].Start()
-		ForeignCurrencyMap[tmpForeignCurrency.SN]=tmpForeignCurrency
+		ForeignCurrencyMap[tmpForeignCurrency.SN] = tmpForeignCurrency
 	}
 
 }
