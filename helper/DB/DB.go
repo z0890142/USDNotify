@@ -3,6 +3,7 @@ package DB
 import (
 	"fmt"
 	"time"
+	"github.com/wcharczuk/go-chart"
 
 	//前面加 _ 是為了只讓他執行init
 	"USDNotify/model"
@@ -146,4 +147,24 @@ func GetSNByName(Name string) (SN int) {
 	}
 	return
 
+}
+
+func Get3MonthSellPrice(SN int)(priceList []float64,dateList []time.Time,err error){
+
+	sqlString := "select Price,Date from ForeignCurrencySellPrice where SN=? and Date between DATE_SUB(CURDATE(), INTERVAL 3 Month) and CURDATE()"
+	rows,err:=db.Query(sqlString,SN)
+	if err!=nil{
+		return priceList,dateList,fmt.Errorf("Get3MonthSellPrice : %v",err)
+	}
+	for rows.Next(){
+		var tmpPrice float64
+		var tmpDate string
+		rows.Scan(&tmpPrice,&tmpDate)
+		parsed, _ := time.Parse(chart.DefaultDateFormat, tmpDate)
+
+		priceList=append(priceList,tmpPrice)
+		dateList=append(dateList,parsed)
+
+	}
+	return
 }

@@ -31,24 +31,42 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 			case *linebot.TextMessage:
 				//member add group
 				if strings.Contains(message.Text, "訂閱") {
+					var to string
+
 					name := strings.Split(message.Text," ")[1]
+					groupID:=event.Source.GroupID
+
 					userID := event.Source.UserID
-					err:=DB.CheclUserExist(userID)
+					if groupID!=""{
+						to=groupID
+					}else{
+						to=userID
+					}
+					err:=DB.CheclUserExist(to)
 					if err != nil {
 						Log.Error(err)
-						service.PushMessage(userID, "訂閱失敗", Log)
+						service.PushMessage(to, "訂閱失敗", Log)
 						return
 					}
-					err = DB.InsertSubscribeMember(name, userID)
+					err = DB.InsertSubscribeMember(name, to)
 					if err != nil {
 						Log.Error(err)
-						service.PushMessage(userID, "訂閱失敗", Log)
+						service.PushMessage(to, "訂閱失敗", Log)
 						return
 					}
-					service.PushMessage(userID, "訂閱成功", Log)
-				} else {
+					service.PushMessage(to, "訂閱成功", Log)
+				}else if message.Text=="圖"{
+					service.Get3MonthChart(1)
+				}else {
+					var to string
+					groupID:=event.Source.GroupID
 					userID := event.Source.UserID
-					foreignCurrency.GetNowPrice(message.Text, userID, Log)
+					if groupID!=""{
+						to=groupID
+					}else{
+						to=userID
+					}
+					foreignCurrency.GetNowPrice(message.Text, to, Log)
 
 				}
 
