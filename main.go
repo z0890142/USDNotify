@@ -26,7 +26,7 @@ func init() {
 	InitConfig()
 	DB.CreateDbConn("mysql", viper.GetString("DB.connectString"), Log)
 	foreignCurrency.Init()
-	//Init_bot()
+	Init_bot()
 }
 
 func Init_bot() {
@@ -53,9 +53,9 @@ func main() {
 	router := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./static/.well-known/acme-challenge"))
 	router.PathPrefix("/.well-known/acme-challenge/").Handler(http.StripPrefix("/.well-known/acme-challenge/", fs))
-	http.ListenAndServe(addr, nil)
+	// http.ListenAndServe(addr, nil)
 
-	// http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", nil)
+	http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", nil)
 }
 
 func InitConfig() {

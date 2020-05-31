@@ -4,6 +4,7 @@ import (
 	"USDNotify/helper/Comman"
 	"USDNotify/helper/DB"
 	service "USDNotify/services"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var Log *logrus.Entry
+var ForeignCurrencyMap map[int]*ForeignCurrency
+var ForeignCurrencyCronMap map[int]*cron.Cron
+
 type ForeignCurrency struct {
 	SN               int
 	Name             string
@@ -21,8 +26,8 @@ type ForeignCurrency struct {
 	Log           *logrus.Entry
 	Today_Lowest  float64
 	Today_Heigest float64
-	now_sell      float64
-	now_buyin     float64
+	Now_sell      float64
+	Now_buyIn     float64
 }
 
 type ForeignCurrencyRecord struct {
@@ -40,13 +45,10 @@ type ForeignCurrencyRecord struct {
 	FiveYear_Heigest   float64
 }
 
-var Log *logrus.Entry
-var ForeignCurrencyMap map[int]*cron.Cron
-
 func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
-	ForeignCurrencyMap = make(map[int]*cron.Cron)
-	service.SetForeignCurrencyMap(&ForeignCurrencyMap)
+	ForeignCurrencyMap = make(map[int]*ForeignCurrency)
+	ForeignCurrencyCronMap = make(map[int]*cron.Cron)
 }
 
 func (f *ForeignCurrency) Run() {
@@ -83,58 +85,13 @@ func (f *ForeignCurrency) Run() {
 			"buyIn":    buyIn,
 			"sell":     sell,
 		}).Info("Price info")
-		f.now_sell = sell
-		f.now_buyIn = buyIn
+		f.Now_sell = sell
+		f.Now_buyIn = buyIn
 		f.LowestHandler(sell)
 		f.HeigestHandler(buyIn)
 	}
 
 }
-
-func Init() {
-	currencyList, nameList, err := DB.GetForeignCurrencyList()
-	if err != nil {
-		Log.WithFields(logrus.Fields{
-			"error": err,
-		}).Error("GetForeignCurrencyList Error")
-	}
-	for index, currency := range currencyList {
-		record, err := DB.GetForeignCurrencyRecord(currency)
-		if err != nil {
-			Log.WithFields(logrus.Fields{
-				"error": err,
-			}).Error("GetForeignCurrencyRecord Error")
-		}
-		_Log, _ := Comman.LogInit(nameList[index], "USDNotify", logrus.DebugLevel)
-
-		tmpForeignCurrency := &ForeignCurrency{
-			Name:             nameList[index],
-			SN:               currency,
-			Subscribe_Number: 0,
-			Log:              _Log,
-		}
-
-		tmpForeignCurrency.Heigest = record.Heigest
-		tmpForeignCurrency.Lowest = record.Lowest
-		tmpForeignCurrency.ThirdMonth_Heigest = record.ThirdMonth_Heigest
-		tmpForeignCurrency.ThirdYear_Lowest = record.ThirdYear_Lowest
-		tmpForeignCurrency.SixMonth_Heigest = record.SixMonth_Heigest
-		tmpForeignCurrency.SixMonth_Lowest = record.SixMonth_Lowest
-		tmpForeignCurrency.OneYear_Heigest = record.OneYear_Heigest
-		tmpForeignCurrency.OneYear_Lowest = record.OneYear_Lowest
-		tmpForeignCurrency.ThirdMonth_Heigest = record.ThirdMonth_Heigest
-		tmpForeignCurrency.ThirdMonth_Lowest = record.ThirdMonth_Lowest
-		tmpForeignCurrency.FiveYear_Heigest = record.FiveYear_Heigest
-		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
-
-		ForeignCurrencyMap[currency] = cron.New()
-		ForeignCurrencyMap[currency].AddJob("0 0/10 9-16 * * *", tmpForeignCurrency)
-		ForeignCurrencyMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
-		ForeignCurrencyMap[currency].Start()
-	}
-
-}
-
 func (f *ForeignCurrency) SaveTodayPrice() {
 	err := DB.SaveTodayPrice(f.SN, f.Today_Lowest, f.Today_Heigest)
 	if err != nil {
@@ -266,5 +223,58 @@ func (f *ForeignCurrency) HeigestHandler(buyin float64) {
 
 	for _, user := range userList {
 		service.PushMessage(user, msg, f.Log)
+	}
+}
+func Init() {
+	currencyList, nameList, err := DB.GetForeignCurrencyList()
+	if err != nil {
+		Log.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("GetForeignCurrencyList Error")
+	}
+	for index, currency := range currencyList {
+		record, err := DB.GetForeignCurrencyRecord(currency)
+		if err != nil {
+			Log.WithFields(logrus.Fields{
+				"error": err,
+			}).Error("GetForeignCurrencyRecord Error")
+		}
+		_Log, _ := Comman.LogInit(nameList[index], "USDNotify", logrus.DebugLevel)
+
+		tmpForeignCurrency := &ForeignCurrency{
+			Name:             nameList[index],
+			SN:               currency,
+			Subscribe_Number: 0,
+			Log:              _Log,
+		}
+
+		tmpForeignCurrency.Heigest = record.Heigest
+		tmpForeignCurrency.Lowest = record.Lowest
+		tmpForeignCurrency.ThirdYear_Heigest = record.ThirdYear_Heigest
+		tmpForeignCurrency.ThirdYear_Lowest = record.ThirdYear_Lowest
+		tmpForeignCurrency.SixMonth_Heigest = record.SixMonth_Heigest
+		tmpForeignCurrency.SixMonth_Lowest = record.SixMonth_Lowest
+		tmpForeignCurrency.OneYear_Heigest = record.OneYear_Heigest
+		tmpForeignCurrency.OneYear_Lowest = record.OneYear_Lowest
+		tmpForeignCurrency.ThirdMonth_Heigest = record.ThirdMonth_Heigest
+		tmpForeignCurrency.ThirdMonth_Lowest = record.ThirdMonth_Lowest
+		tmpForeignCurrency.FiveYear_Heigest = record.FiveYear_Heigest
+		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
+		
+		ForeignCurrencyCronMap[currency] = cron.New()
+		ForeignCurrencyCronMap[currency].AddJob("0 0/10 9-16 * * *", tmpForeignCurrency)
+		ForeignCurrencyCronMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
+		ForeignCurrencyCronMap[currency].Start()
+		ForeignCurrencyMap[tmpForeignCurrency.SN]=tmpForeignCurrency
+	}
+
+}
+
+func GetNowPrice(name string, to string, Log *logrus.Entry) {
+	for _, foreignCurrency := range ForeignCurrencyMap {
+		if strings.Contains(foreignCurrency.Name, strings.ToUpper(name)) {
+			msg := foreignCurrency.Name + "\n 銀行即期賣價 : " + fmt.Sprintf("%v", foreignCurrency.Now_sell) + "\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn)
+			service.PushMessage(to, msg, Log)
+		}
 	}
 }

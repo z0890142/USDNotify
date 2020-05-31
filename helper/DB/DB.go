@@ -110,6 +110,21 @@ func GetSubscribeMember(SN int) (userList []string, err error) {
 
 	return
 }
+func CheclUserExist(userID string)error{
+	var count int
+	sqlString := "select count(*) as count from User where UserId=?"
+	db.QueryRow(sqlString,userID).Scan(&count)
+	if count>0{
+		return nil
+	}
+	sqlString = "insert into User(UserId) values(?)"
+	_,err:=db.Exec(sqlString,userID)
+	if err != nil {
+		return fmt.Errorf("InsertSubscribeMember : %v", err)
+	}
+	return nil
+
+}
 
 func InsertSubscribeMember(Name string, userID string) error {
 	SN := GetSNByName(Name)
@@ -123,9 +138,12 @@ func InsertSubscribeMember(Name string, userID string) error {
 }
 
 func GetSNByName(Name string) (SN int) {
-	sqlString := "select SN from ForeignCurrency where DisplayName like '%" + Name + "%'"
-	db.QueryRow(sqlString, Name).Scan(&SN)
-
+	sqlString := "select SN from ForeignCurrency where DisplayName like '%"+Name+"%'"
+	row:=db.QueryRow(sqlString)
+	err:=row.Scan(&SN)
+	if err!=nil{
+		fmt.Println(err.Error())
+	}
 	return
 
 }

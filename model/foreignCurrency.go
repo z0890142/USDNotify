@@ -1,11 +1,17 @@
 package model
 
+import "github.com/sirupsen/logrus"
+
 type ForeignCurrency struct {
+	SN               int
 	Name             string
 	Subscribe_Number int
 	ForeignCurrencyRecord
+	Log           *logrus.Entry
 	Today_Lowest  float64
 	Today_Heigest float64
+	Now_sell      float64
+	Now_buyIn     float64
 }
 
 type ForeignCurrencyRecord struct {
