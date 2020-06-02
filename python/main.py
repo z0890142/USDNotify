@@ -9,6 +9,9 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import sys
 
+config = configparser.ConfigParser()
+config.read('../config/config.ini')
+
 price=[]
 date=[]
 name=sys.argv[1]
@@ -16,10 +19,10 @@ SN=sys.argv[2]
 try:
   
     connection = mysql.connector.connect(
-        host='127.0.0.1',          # 主機名稱
-        database='ForeignCurrency', # 資料庫名稱
-        user='developer',        # 帳號
-        password='smap01')  # 密碼
+        host=config.get('default', 'host'),          # 主機名稱
+        database=config.get('default', 'database'), # 資料庫名稱
+        user=config.get('default', 'user'),        # 帳號
+        password=config.get('default', 'password')  # 密碼
 
     # 查詢資料庫
     cursor = connection.cursor()
