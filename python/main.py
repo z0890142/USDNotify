@@ -25,6 +25,7 @@ try:
         user=config.get('default', 'user'),        # 帳號
         password=config.get('default', 'password')  # 密碼
     )
+    
     # 查詢資料庫
     cursor = connection.cursor()
     cursor.execute("select Price,Date from ForeignCurrencySellPrice where SN="+SN+" and Date between DATE_SUB(CURDATE(), INTERVAL 1 Year) and CURDATE()")
