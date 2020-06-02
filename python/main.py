@@ -8,6 +8,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.ticker as ticker
 import sys
+import configparser
 
 config = configparser.ConfigParser()
 config.read('../config/config.ini')
@@ -23,7 +24,7 @@ try:
         database=config.get('default', 'database'), # 資料庫名稱
         user=config.get('default', 'user'),        # 帳號
         password=config.get('default', 'password')  # 密碼
-
+    )
     # 查詢資料庫
     cursor = connection.cursor()
     cursor.execute("select Price,Date from ForeignCurrencySellPrice where SN="+SN+" and Date between DATE_SUB(CURDATE(), INTERVAL 1 Year) and CURDATE()")
