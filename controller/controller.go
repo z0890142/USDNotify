@@ -7,6 +7,7 @@ import (
 	service "USDNotify/services"
 	"net/http"
 	"strings"
+
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/sirupsen/logrus"
 )
@@ -33,16 +34,16 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 				if strings.Contains(message.Text, "訂閱") {
 					var to string
 
-					name := strings.Split(message.Text," ")[1]
-					groupID:=event.Source.GroupID
+					name := strings.Split(message.Text, " ")[1]
+					groupID := event.Source.GroupID
 
 					userID := event.Source.UserID
-					if groupID!=""{
-						to=groupID
-					}else{
-						to=userID
+					if groupID != "" {
+						to = groupID
+					} else {
+						to = userID
 					}
-					err:=DB.CheclUserExist(to)
+					err := DB.CheclUserExist(to)
 					if err != nil {
 						Log.Error(err)
 						service.PushMessage(to, "訂閱失敗", Log)
@@ -55,16 +56,14 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					service.PushMessage(to, "訂閱成功", Log)
-				}else if message.Text=="圖"{
-					service.Get3MonthChart(1)
-				}else {
+				} else {
 					var to string
-					groupID:=event.Source.GroupID
+					groupID := event.Source.GroupID
 					userID := event.Source.UserID
-					if groupID!=""{
-						to=groupID
-					}else{
-						to=userID
+					if groupID != "" {
+						to = groupID
+					} else {
+						to = userID
 					}
 					foreignCurrency.GetNowPrice(message.Text, to, Log)
 

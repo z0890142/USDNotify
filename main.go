@@ -26,7 +26,7 @@ func init() {
 	InitConfig()
 	DB.CreateDbConn("mysql", viper.GetString("DB.connectString"), Log)
 	foreignCurrency.Init()
-	Init_bot()
+	//Init_bot()
 }
 
 func Init_bot() {
@@ -46,16 +46,24 @@ func Init_bot() {
 }
 func main() {
 
-	http.HandleFunc("/callback", controller.CallbackHandler)
 	port := "8088"
 	addr := fmt.Sprintf(":%s", port)
 
 	router := mux.NewRouter()
-	fs := http.FileServer(http.Dir("./static/.well-known/acme-challenge"))
-	router.PathPrefix("/.well-known/acme-challenge/").Handler(http.StripPrefix("/.well-known/acme-challenge/", fs))
-	// http.ListenAndServe(addr, nil)
+	router.HandleFunc("/callback", controller.CallbackHandler)
 
-	http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", nil)
+	// fs := http.FileServer(http.Dir("./static/.well-known/acme-challenge"))
+	// router.PathPrefix("/.well-known/acme-challenge/").Handler(http.StripPrefix("/.well-known/acme-challenge/", fs))
+
+	fs := http.FileServer(http.Dir("./static/picture"))
+	router.PathPrefix("/picture/").Handler(http.StripPrefix("/picture/", fs))
+
+	err := http.ListenAndServe(addr, router)
+
+	// err := http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", router)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func InitConfig() {

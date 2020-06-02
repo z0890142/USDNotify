@@ -3,7 +3,6 @@ package DB
 import (
 	"fmt"
 	"time"
-	"github.com/wcharczuk/go-chart"
 
 	//前面加 _ 是為了只讓他執行init
 	"USDNotify/model"
@@ -111,15 +110,15 @@ func GetSubscribeMember(SN int) (userList []string, err error) {
 
 	return
 }
-func CheclUserExist(userID string)error{
+func CheclUserExist(userID string) error {
 	var count int
 	sqlString := "select count(*) as count from User where UserId=?"
-	db.QueryRow(sqlString,userID).Scan(&count)
-	if count>0{
+	db.QueryRow(sqlString, userID).Scan(&count)
+	if count > 0 {
 		return nil
 	}
 	sqlString = "insert into User(UserId) values(?)"
-	_,err:=db.Exec(sqlString,userID)
+	_, err := db.Exec(sqlString, userID)
 	if err != nil {
 		return fmt.Errorf("InsertSubscribeMember : %v", err)
 	}
@@ -139,32 +138,23 @@ func InsertSubscribeMember(Name string, userID string) error {
 }
 
 func GetSNByName(Name string) (SN int) {
-	sqlString := "select SN from ForeignCurrency where DisplayName like '%"+Name+"%'"
-	row:=db.QueryRow(sqlString)
-	err:=row.Scan(&SN)
-	if err!=nil{
+	sqlString := "select SN from ForeignCurrency where DisplayName like '%" + Name + "%'"
+	row := db.QueryRow(sqlString)
+	err := row.Scan(&SN)
+	if err != nil {
 		fmt.Println(err.Error())
 	}
 	return
 
 }
 
-func Get3MonthSellPrice(SN int)(priceList []float64,dateList []time.Time,err error){
-
-	sqlString := "select Price,Date from ForeignCurrencySellPrice where SN=? and Date between DATE_SUB(CURDATE(), INTERVAL 3 Month) and CURDATE()"
-	rows,err:=db.Query(sqlString,SN)
-	if err!=nil{
-		return priceList,dateList,fmt.Errorf("Get3MonthSellPrice : %v",err)
-	}
-	for rows.Next(){
-		var tmpPrice float64
-		var tmpDate string
-		rows.Scan(&tmpPrice,&tmpDate)
-		parsed, _ := time.Parse(chart.DefaultDateFormat, tmpDate)
-
-		priceList=append(priceList,tmpPrice)
-		dateList=append(dateList,parsed)
-
+func GetNameBySN(SN int) (name string) {
+	sqlString := "select DisplayName from ForeignCurrency where SN=?"
+	row := db.QueryRow(sqlString, SN)
+	err := row.Scan(&name)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 	return
+
 }

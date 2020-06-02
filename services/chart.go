@@ -1,44 +1,24 @@
 package service
 
-import(
-	"os"
-	"github.com/wcharczuk/go-chart"
+import (
 	"USDNotify/helper/DB"
-	"fmt"
+	"os/exec"
+	"strconv"
 
+	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/sirupsen/logrus"
 )
 
-
-func Get3MonthChart(SN int){
-	yValues,xValues,err:=DB.Get3MonthSellPrice(SN)
-	if err!=nil{
-		fmt.Println(err.Error())
-	}
-	priceSeries := chart.TimeSeries{
-		Name: "SPY",
-		Style: chart.Style{
-			StrokeColor: chart.GetDefaultColor(0),
-		},
-		XValues: xValues,
-		YValues: yValues,
+func GetChart(SN int, to string, Log *logrus.Entry) {
+	displayName := DB.GetNameBySN(SN)
+	cmd := exec.Command("python", "./main.py", displayName, strconv.Itoa(SN))
+	_, err := cmd.Output()
+	if err != nil {
+		Log.WithFields(logrus.Fields{
+			"Error": err,
+		}).Error("GetChart Error")
+		return
 	}
 
-	graph := chart.Chart{
-		XAxis: chart.XAxis{
-			TickPosition: chart.TickPositionBetweenTicks,
-		},
-		YAxis: chart.YAxis{
-			Range: &chart.ContinuousRange{
-				Max: 40.0,
-				Min: 0,
-			},
-		},
-		Series: []chart.Series{
-			priceSeries,
-		},
-	}
-	
-	f, _ := os.Create("./static/picture/output.jpg")
-	defer f.Close()
-	graph.Render(chart.PNG, f)
+	bot.PushMessage(to, linebot.NewImageMessage("", ""))
 }
