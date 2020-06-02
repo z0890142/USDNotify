@@ -5,10 +5,8 @@ import (
 	"USDNotify/helper/DB"
 	service "USDNotify/services"
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/anaskhan96/soup"
 	"github.com/robfig/cron"
 
 	"github.com/sirupsen/logrus"
@@ -16,7 +14,7 @@ import (
 
 var Log *logrus.Entry
 var ForeignCurrencyMap map[int]*ForeignCurrency
-var ForeignCurrencyCronMap map[int]*cron.Cron
+var masterCron *cron.Cron
 
 type ForeignCurrency struct {
 	SN               int
@@ -28,6 +26,7 @@ type ForeignCurrency struct {
 	Today_Heigest float64
 	Now_sell      float64
 	Now_buyIn     float64
+	UpdateTime    string
 }
 
 type ForeignCurrencyRecord struct {
@@ -48,94 +47,12 @@ type ForeignCurrencyRecord struct {
 func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
 	ForeignCurrencyMap = make(map[int]*ForeignCurrency)
-	ForeignCurrencyCronMap = make(map[int]*cron.Cron)
-}
-
-//from fubon
-// func (f *ForeignCurrency) Run() {
-
-// 	soup.Headers = map[string]string{
-// 		"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-// 	}
-
-// 	source, err := soup.Get("https://www.fubon.com/Fubon_Portal/banking/Personal/deposit/exchange_rate/exchange_rate1.jsp")
-// 	if err != nil {
-
-// 	}
-// 	doc := soup.HTMLParse(source)
-// 	for _, root := range doc.Find("table", "class", "rate-table").FindAll("tr") {
-
-// 		tdArray := root.FindAll("td")
-// 		if len(tdArray) == 0 {
-// 			continue
-// 		}
-// 		name := tdArray[1].Find("div").Text()
-// 		if !strings.Contains(name, f.Name) {
-// 			continue
-// 		}
-
-// 		priceDiv := tdArray[3].Find("div")
-// 		buyInStr := strings.TrimSpace(priceDiv.Text())
-// 		sellStr := strings.TrimSpace(priceDiv.Find("br").FindNextSibling().NodeValue)
-
-// 		buyIn, _ := strconv.ParseFloat(buyInStr, 64)
-// 		sell, _ := strconv.ParseFloat(sellStr, 64)
-// 		Log.WithFields(logrus.Fields{
-// 			"buyInStr": buyInStr,
-// 			"sellStr":  sellStr,
-// 			"buyIn":    buyIn,
-// 			"sell":     sell,
-// 		}).Info("Price info")
-// 		f.Now_sell = sell
-// 		f.Now_buyIn = buyIn
-// 		f.LowestHandler(sell)
-// 		f.HeigestHandler(buyIn)
-// 	}
-
-// }
-
-func (f *ForeignCurrency) Run() {
-
-	soup.Headers = map[string]string{
-		"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-	}
-
-	source, err := soup.Get("https://rate.bot.com.tw/xrt?Lang=zh-TW")
-	if err != nil {
-
-	}
-	doc := soup.HTMLParse(source)
-	for _, root := range doc.Find("table", "title", "牌告匯率").FindAll("tr") {
-
-		tdArray := root.FindAll("td")
-		if len(tdArray) == 0 {
-			continue
-		}
-		name := tdArray[0].Find("div", "class", "print_show").Text()
-		name = strings.Replace(name, " ", "", -1)
-		name = strings.Replace(name, "\n", "", -1)
-
-		if !strings.Contains(name, f.Name) {
-			continue
-		}
-		buyInStr := tdArray[3].Text()
-		sellStr := tdArray[4].Text()
-
-		buyIn, _ := strconv.ParseFloat(buyInStr, 64)
-		sell, _ := strconv.ParseFloat(sellStr, 64)
-		Log.WithFields(logrus.Fields{
-			"buyInStr": buyInStr,
-			"sellStr":  sellStr,
-			"buyIn":    buyIn,
-			"sell":     sell,
-		}).Info("Price info")
-		f.Now_sell = sell
-		f.Now_buyIn = buyIn
-		f.LowestHandler(sell)
-		f.HeigestHandler(buyIn)
-	}
+	masterCron = cron.New()
+	masterCron.AddFunc("0 0/5 9-17 * * *", Crawler)
+	masterCron.Start()
 
 }
+
 func (f *ForeignCurrency) SaveTodayPrice() {
 	err := DB.SaveTodayPrice(f.SN, f.Today_Lowest, f.Today_Heigest)
 	if err != nil {
@@ -305,19 +222,17 @@ func Init() {
 		tmpForeignCurrency.FiveYear_Heigest = record.FiveYear_Heigest
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
 
-		ForeignCurrencyCronMap[currency] = cron.New()
-		ForeignCurrencyCronMap[currency].AddJob("0 0/10 9-16 * * *", tmpForeignCurrency)
-		ForeignCurrencyCronMap[currency].AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
-		ForeignCurrencyCronMap[currency].Start()
+		masterCron.AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
 		ForeignCurrencyMap[tmpForeignCurrency.SN] = tmpForeignCurrency
 	}
-
 }
 
 func GetNowPrice(name string, to string, Log *logrus.Entry) {
 	for _, foreignCurrency := range ForeignCurrencyMap {
 		if strings.Contains(foreignCurrency.Name, strings.ToUpper(name)) {
-			msg := foreignCurrency.Name + "\n 銀行即期賣價 : " + fmt.Sprintf("%v", foreignCurrency.Now_sell) + "\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn)
+			msg := foreignCurrency.Name + "\n 銀行即期賣價 : " + fmt.Sprintf("%v", foreignCurrency.Now_sell) +
+				"\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn) +
+				"\n 更新時間 : " + foreignCurrency.UpdateTime
 			service.PushMessage(to, msg, Log)
 		}
 	}
