@@ -10,15 +10,15 @@ import matplotlib.ticker as ticker
 import sys
 import configparser
 
-config = configparser.ConfigParser()
-config.read('../config/config.ini')
+
 
 price=[]
 date=[]
 name=sys.argv[1]
 SN=sys.argv[2]
 try:
-  
+    config = configparser.ConfigParser()
+    config.read('../config/config.ini') 
     connection = mysql.connector.connect(
         host=config.get('default', 'host'),          # 主機名稱
         database=config.get('default', 'database'), # 資料庫名稱
