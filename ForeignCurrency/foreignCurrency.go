@@ -234,6 +234,8 @@ func GetNowPrice(name string, to string, Log *logrus.Entry) {
 				"\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn) +
 				"\n 更新時間 : " + foreignCurrency.UpdateTime
 			service.PushMessage(to, msg, Log)
+			service.GetChart(foreignCurrency.SN, to, Log)
+
 		}
 	}
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"USDNotify/helper/DB"
+	"bytes"
 	"os/exec"
 	"strconv"
 
@@ -11,13 +12,21 @@ import (
 
 func GetChart(SN int, to string, Log *logrus.Entry) {
 	displayName := DB.GetNameBySN(SN)
-	cmd := exec.Command("python", "./main.py", displayName, strconv.Itoa(SN))
-	_, err := cmd.Output()
+	//relative path of main.go or ABSOLUTE_PATH
+	cmd := exec.Command("python3", "./python/main.py", displayName, strconv.Itoa(SN))
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
 	if err != nil {
 		Log.WithFields(logrus.Fields{
-			"Error": err,
+			"Error": stderr.String(),
 		}).Error("GetChart Error")
 		return
+	} else {
+		Log.Info(out.String())
 	}
 
 	bot.PushMessage(to, linebot.NewImageMessage("", ""))

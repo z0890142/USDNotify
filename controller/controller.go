@@ -66,7 +66,6 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 						to = userID
 					}
 					foreignCurrency.GetNowPrice(message.Text, to, Log)
-
 				}
 
 			}
@@ -74,4 +73,10 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+func PictureTest(w http.ResponseWriter, r *http.Request) {
+	Log, _ := Comman.LogInit("PictureTest", "USDNotify", logrus.DebugLevel)
+
+	service.GetChart(1, "", Log)
 }

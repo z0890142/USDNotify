@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import datetime
 import time
@@ -11,19 +12,26 @@ import sys
 import configparser
 
 
+matplotlib.use('Agg')
+
 
 price=[]
 date=[]
 name=sys.argv[1]
 SN=sys.argv[2]
+
 try:
     config = configparser.ConfigParser()
-    config.read('../config/config.ini') 
+    
+    #relative path of main.go or ABSOLUTE_PATH
+    config.read('./config/config.ini') 
+
     connection = mysql.connector.connect(
         host=config.get('default', 'host'),          # 主機名稱
         database=config.get('default', 'database'), # 資料庫名稱
         user=config.get('default', 'user'),        # 帳號
-        password=config.get('default', 'password')  # 密碼
+        password=config.get('default', 'pwd'),
+        auth_plugin='mysql_native_password'
     )
     
     # 查詢資料庫
@@ -51,8 +59,8 @@ finally:
 
 end = datetime.date.today() #開始時間結束時間,選取最近一年的資料
 start =  end-relativedelta(years=1)
-end = end.strftime("%Y/%m/%d") 
-start = start.strftime("%Y/%m/%d") 
+end = end.strftime("%Y%m%d") 
+start = start.strftime("%Y%m%d") 
 
 sns.set_style("whitegrid")
 
@@ -67,4 +75,5 @@ sns.lineplot(x='date', y='price', data=df)
 
 ax.set(xlabel='', ylabel='')
 
-f.savefig("../static/picture/"+name+" "+start+"-"+end+'.jpg', dpi=200, bbox_inches='tight')
+#relative path of main.go or ABSOLUTE_PATH
+f.savefig("./static/picture/"+name+" "+start+"-"+end+'.jpg', dpi=200, bbox_inches='tight')

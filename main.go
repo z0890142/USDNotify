@@ -51,7 +51,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/callback", controller.CallbackHandler)
-
+	router.HandleFunc("/PictureTest", controller.PictureTest).Methods("POST")
 	// fs := http.FileServer(http.Dir("./static/.well-known/acme-challenge"))
 	// router.PathPrefix("/.well-known/acme-challenge/").Handler(http.StripPrefix("/.well-known/acme-challenge/", fs))
 
