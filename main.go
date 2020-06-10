@@ -26,7 +26,7 @@ func init() {
 	InitConfig()
 	DB.CreateDbConn("mysql", viper.GetString("DB.connectString"), Log)
 	foreignCurrency.Init()
-	//Init_bot()
+	Init_bot()
 }
 
 func Init_bot() {
@@ -58,9 +58,9 @@ func main() {
 	fs := http.FileServer(http.Dir("./static/picture"))
 	router.PathPrefix("/picture/").Handler(http.StripPrefix("/picture/", fs))
 
-	err := http.ListenAndServe(addr, router)
+	// err := http.ListenAndServe(addr, router)
 
-	// err := http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", router)
+	err := http.ListenAndServeTLS(addr, "./static/ssl/bundle.crt", "./static/ssl/private.key", router)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

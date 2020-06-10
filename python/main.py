@@ -64,7 +64,7 @@ start = start.strftime("%Y%m%d")
 
 sns.set_style("whitegrid")
 
-f, ax = plt.subplots(figsize = (8, 4))
+f, ax = plt.subplots(figsize = (8, 6))
 ax.set_title(name+" "+start+"-"+end, fontsize=18, position=(0.5,1.05))
 ax.tick_params(axis='y',labelsize=8) # y轴
 ax.tick_params(axis='x',labelsize=8, rotation=45) # x轴
@@ -76,4 +76,4 @@ sns.lineplot(x='date', y='price', data=df)
 ax.set(xlabel='', ylabel='')
 
 #relative path of main.go or ABSOLUTE_PATH
-f.savefig("./static/picture/"+name+" "+start+"-"+end+'.jpg', dpi=200, bbox_inches='tight')
+f.savefig("./static/picture/"+name+'.jpg', dpi=200, bbox_inches='tight')

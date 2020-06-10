@@ -149,7 +149,7 @@ func GetSNByName(Name string) (SN int) {
 }
 
 func GetNameBySN(SN int) (name string) {
-	sqlString := "select DisplayName from ForeignCurrency where SN=?"
+	sqlString := "select Name from ForeignCurrency where SN=?"
 	row := db.QueryRow(sqlString, SN)
 	err := row.Scan(&name)
 	if err != nil {

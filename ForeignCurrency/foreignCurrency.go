@@ -48,7 +48,7 @@ func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
 	ForeignCurrencyMap = make(map[int]*ForeignCurrency)
 	masterCron = cron.New()
-	masterCron.AddFunc("0 0/5 9-17 * * *", Crawler)
+	masterCron.AddFunc("0 0/10 9-17 * * *", Crawler)
 	masterCron.Start()
 
 }
@@ -74,7 +74,7 @@ func (f *ForeignCurrency) LowestHandler(sell float64) {
 		f.Lowest = sell
 		f.Today_Lowest = sell
 		msg = f.Name + "銀行賣價已達五年內最低價"
-	} else if f.ThirdMonth_Lowest > sell {
+	} else if f.ThirdYear_Lowest > sell {
 		f.ThirdYear_Lowest = sell
 		f.OneYear_Lowest = sell
 		f.SixMonth_Lowest = sell
@@ -136,7 +136,7 @@ func (f *ForeignCurrency) HeigestHandler(buyin float64) {
 		f.Heigest = buyin
 		f.Today_Heigest = buyin
 		msg = f.Name + "銀行買價已達五年內最高價"
-	} else if f.ThirdMonth_Heigest < buyin {
+	} else if f.ThirdYear_Heigest < buyin {
 		f.ThirdYear_Heigest = buyin
 		f.OneYear_Heigest = buyin
 		f.SixMonth_Heigest = buyin
