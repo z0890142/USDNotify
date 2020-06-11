@@ -29,7 +29,7 @@ func GetChart(SN int, to string, Log *logrus.Entry) {
 		Log.Info(out.String())
 	}
 	message := linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+displayName+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
-	if _, err := bot.PushMessage(to, message).Do(); err != nil {
+	if _, err := bot.ReplyMessage(to, message).Do(); err != nil {
 		Log.Error(err)
 	}
 }

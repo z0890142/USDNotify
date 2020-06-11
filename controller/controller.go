@@ -34,6 +34,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 				if strings.Contains(message.Text, "訂閱") {
 					var to string
 
+					replyToken := event.ReplyToken
 					name := strings.Split(message.Text, " ")[1]
 					groupID := event.Source.GroupID
 
@@ -46,26 +47,23 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 					err := DB.CheclUserExist(to)
 					if err != nil {
 						Log.Error(err)
-						service.PushMessage(to, "訂閱失敗", Log)
+						service.ReplyMessage(replyToken, "訂閱失敗", Log)
 						return
 					}
 					err = DB.InsertSubscribeMember(name, to)
-					if err != nil {
+					if err != nil && strings.Contains(err.Error(), "sql: no rows in result set") {
 						Log.Error(err)
-						service.PushMessage(to, "訂閱失敗", Log)
+						service.ReplyMessage(replyToken, "重複訂閱", Log)
+						return
+					} else if err != nil {
+						Log.Error(err)
+						service.ReplyMessage(replyToken, "訂閱失敗", Log)
 						return
 					}
-					service.PushMessage(to, "訂閱成功", Log)
+					service.ReplyMessage(replyToken, "訂閱成功", Log)
 				} else {
-					var to string
-					groupID := event.Source.GroupID
-					userID := event.Source.UserID
-					if groupID != "" {
-						to = groupID
-					} else {
-						to = userID
-					}
-					foreignCurrency.GetNowPrice(message.Text, to, Log)
+					replyToken := event.ReplyToken
+					foreignCurrency.GetNowPrice(message.Text, replyToken, Log)
 				}
 
 			}

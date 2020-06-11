@@ -72,6 +72,25 @@ func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, e
 
 	return
 }
+func SaveTodayBuyInPrice(SN int, buyInPrice float64) error {
+	date := time.Now().In(time.FixedZone("CST", 28800)).Format("2006-01-02")
+	_, err := db.Exec("insert into ForeignCurrencyBuyInPrice(SN,Price,Date) values(?,?,?)",
+		SN, buyInPrice, date)
+	if err != nil {
+		return fmt.Errorf("SaveTodayBuyInPrice : %v", err)
+	}
+	return nil
+}
+
+func SaveTodaySellPrice(SN int, sellPrice float64) error {
+	date := time.Now().In(time.FixedZone("CST", 28800)).Format("2006-01-02")
+	_, err := db.Exec("insert into ForeignCurrencySellPrice(SN,Price,Date) values(?,?,?)",
+		SN, sellPrice, date)
+	if err != nil {
+		return fmt.Errorf("SaveTodaySellPrice : %v", err)
+	}
+	return nil
+}
 
 func SaveTodayPrice(SN int, sellPrice float64, buyInPrice float64) error {
 	tx, err := db.Begin()

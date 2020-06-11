@@ -48,7 +48,7 @@ func init() {
 	Log, _ = Comman.LogInit("service", "USDNotify", logrus.DebugLevel)
 	ForeignCurrencyMap = make(map[int]*ForeignCurrency)
 	masterCron = cron.New()
-	masterCron.AddFunc("0 0/10 9-17 * * *", Crawler)
+	masterCron.AddFunc("0 0/10 9-16 * * *", Crawler)
 	masterCron.Start()
 
 }
@@ -61,6 +61,9 @@ func (f *ForeignCurrency) SaveTodayPrice() {
 		}).Error("SaveTodayPrice Error")
 		return
 	}
+	f.Today_Lowest = -99
+	f.Today_Heigest = -99
+
 }
 
 func (f *ForeignCurrency) LowestHandler(sell float64) {
@@ -104,7 +107,8 @@ func (f *ForeignCurrency) LowestHandler(sell float64) {
 		f.Lowest = sell
 		f.Today_Lowest = sell
 		msg = f.Name + "銀行賣價已達半個月內最低價"
-	} else if f.Today_Lowest > sell || f.Today_Lowest == 0 {
+	}
+	if f.Today_Lowest > sell || f.Today_Lowest == -99 {
 		f.Today_Lowest = sell
 	}
 
@@ -166,7 +170,9 @@ func (f *ForeignCurrency) HeigestHandler(buyin float64) {
 		f.Heigest = buyin
 		f.Today_Heigest = buyin
 		msg = f.Name + "銀行買價已達半個月內最高價"
-	} else if f.Today_Heigest < buyin {
+	}
+
+	if f.Today_Heigest < buyin || f.Today_Heigest == -99 {
 		f.Today_Heigest = buyin
 	}
 
@@ -222,7 +228,7 @@ func Init() {
 		tmpForeignCurrency.FiveYear_Heigest = record.FiveYear_Heigest
 		tmpForeignCurrency.FiveYear_Lowest = record.FiveYear_Lowest
 
-		masterCron.AddFunc("0 0 16 * * *", tmpForeignCurrency.SaveTodayPrice)
+		masterCron.AddFunc("0 0 17 * * *", tmpForeignCurrency.SaveTodayPrice)
 		ForeignCurrencyMap[tmpForeignCurrency.SN] = tmpForeignCurrency
 	}
 }
@@ -233,7 +239,7 @@ func GetNowPrice(name string, to string, Log *logrus.Entry) {
 			msg := foreignCurrency.Name + "\n 銀行即期賣價 : " + fmt.Sprintf("%v", foreignCurrency.Now_sell) +
 				"\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn) +
 				"\n 更新時間 : " + foreignCurrency.UpdateTime
-			service.PushMessage(to, msg, Log)
+			service.ReplyMessage(to, msg, Log)
 			service.GetChart(foreignCurrency.SN, to, Log)
 
 		}
