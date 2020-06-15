@@ -61,6 +61,19 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					service.ReplyMessage(replyToken, "訂閱成功", Log)
+				} else if strings.Contains(message.Text, "歷年") {
+					replyToken := event.ReplyToken
+					name := strings.Split(message.Text, " ")[1]
+					queryType := strings.Split(message.Text, " ")[2]
+
+					if queryType == "買價" {
+						foreignCurrency.GetBuyInPriceRecord(name, replyToken, Log)
+					} else if queryType == "賣價" {
+						foreignCurrency.GetSellPriceRecord(name, replyToken, Log)
+					} else {
+						service.ReplyMessage(replyToken, "抱歉我聽不懂你在講什麼", Log)
+					}
+
 				} else {
 					replyToken := event.ReplyToken
 					foreignCurrency.GetNowPrice(message.Text, replyToken, Log)

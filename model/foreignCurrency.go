@@ -27,4 +27,17 @@ type ForeignCurrencyRecord struct {
 	ThirdYear_Heigest  float64
 	FiveYear_Lowest    float64
 	FiveYear_Heigest   float64
+
+	Lowest_Date             string
+	Heigest_Date            string
+	ThirdMonth_Lowest_Date  string
+	ThirdMonth_Heigest_Date string
+	SixMonth_Lowest_Date    string
+	SixMonth_Heigest_Date   string
+	OneYear_Lowest_Date     string
+	OneYear_Heigest_Date    string
+	ThirdYear_Lowest_Date   string
+	ThirdYear_Heigest_Date  string
+	FiveYear_Lowest_Date    string
+	FiveYear_Heigest_Date   string
 }

@@ -33,8 +33,8 @@ func CreateDbConn(driveName string, dataSourceName string, Log *logrus.Entry) er
 	return err
 }
 
-func GetForeignCurrencyList() (list []int, nameList []string, err error) {
-	sqlString := "select SN,Name from ForeignCurrency"
+func GetForeignCurrencyList() (list []int, nameList []string, dispalyNameList []string, err error) {
+	sqlString := "select SN,Name,DisplayName from ForeignCurrency"
 	rows, err := db.Query(sqlString)
 	if err != nil {
 		err = fmt.Errorf("Get CurrentPrice : %v", err)
@@ -43,9 +43,11 @@ func GetForeignCurrencyList() (list []int, nameList []string, err error) {
 	for rows.Next() {
 		var tmpSN int
 		var tmpName string
-		rows.Scan(&tmpSN, &tmpName)
+		var tmpdispalyName string
+		rows.Scan(&tmpSN, &tmpName, &tmpdispalyName)
 		list = append(list, tmpSN)
 		nameList = append(nameList, tmpName)
+		dispalyNameList = append(dispalyNameList, tmpdispalyName)
 	}
 
 	return
@@ -53,7 +55,10 @@ func GetForeignCurrencyList() (list []int, nameList []string, err error) {
 
 func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, err error) {
 	sqlString := "select 15_Lowest,15_Heigest,3Month_Lowest,3Month_Heigest,6Month_Lowest,6Month_Heigest," +
-		"1Year_Lowest,1Year_Heigest,3Year_Lowest,3Year_Heigest,5Year_Lowest,5Year_Heigest from ForeignCurrencyRecord " +
+		"1Year_Lowest,1Year_Heigest,3Year_Lowest,3Year_Heigest,5Year_Lowest,5Year_Heigest," +
+		"15_Lowest_Date,15_Heigest_Date,3Month_Lowest_Date,3Month_Heigest_Date,6Month_Lowest_Date,6Month_Heigest_Date," +
+		"1Year_Lowest_Date,1Year_Heigest_Date,3Year_Lowest_Date,3Year_Heigest_Date,5Year_Lowest_Date,5Year_Heigest_Date " +
+		"from ForeignCurrencyRecord " +
 		"where SN=?"
 	db.QueryRow(sqlString, SN).Scan(
 		&recordList.Lowest,
@@ -68,6 +73,19 @@ func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, e
 		&recordList.ThirdYear_Heigest,
 		&recordList.FiveYear_Lowest,
 		&recordList.FiveYear_Heigest,
+
+		&recordList.Lowest_Date,
+		&recordList.Heigest_Date,
+		&recordList.ThirdMonth_Lowest_Date,
+		&recordList.ThirdMonth_Heigest_Date,
+		&recordList.SixMonth_Lowest_Date,
+		&recordList.SixMonth_Heigest_Date,
+		&recordList.OneYear_Lowest_Date,
+		&recordList.OneYear_Heigest_Date,
+		&recordList.ThirdYear_Lowest_Date,
+		&recordList.ThirdYear_Heigest_Date,
+		&recordList.FiveYear_Lowest_Date,
+		&recordList.FiveYear_Heigest_Date,
 	)
 
 	return
