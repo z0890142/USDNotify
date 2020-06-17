@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import sys
 import configparser
+import uuid
 
 
 matplotlib.use('Agg')
@@ -17,9 +18,10 @@ matplotlib.use('Agg')
 
 price=[]
 date=[]
-name=sys.argv[1]
-SN=sys.argv[2]
-
+# name=sys.argv[1]
+# SN=sys.argv[2]
+name="USD"
+SN="1"
 try:
     config = configparser.ConfigParser()
     
@@ -76,4 +78,7 @@ sns.lineplot(x='date', y='price', data=df)
 ax.set(xlabel='', ylabel='')
 
 #relative path of main.go or ABSOLUTE_PATH
-f.savefig("./static/picture/"+name+'.jpg', dpi=200, bbox_inches='tight')
+my_uuid=uuid.uuid4()
+fileName=my_uuid.hex
+f.savefig("./static/picture/"+fileName+'.jpg', dpi=200, bbox_inches='tight')
+print(fileName)
