@@ -67,10 +67,10 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 					}
 					message := []linebot.SendingMessage{linebot.NewTextMessage("訂閱成功")}
 					service.ReplyMessage(replyToken, message, Log)
-				} else if strings.Contains(message.Text, "歷年") {
+				} else if strings.Contains(message.Text, "賣價") || strings.Contains(message.Text, "買價") {
 					replyToken := event.ReplyToken
-					name := strings.Split(message.Text, " ")[1]
-					queryType := strings.Split(message.Text, " ")[2]
+					name := strings.Split(message.Text, " ")[0]
+					queryType := strings.Split(message.Text, " ")[1]
 
 					if queryType == "買價" {
 						foreignCurrency.GetBuyInPriceRecord(name, replyToken, Log)

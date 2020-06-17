@@ -274,6 +274,7 @@ func GetNowPrice(name string, to string, Log *logrus.Entry) {
 			imageMsg, err := service.GetChart(foreignCurrency.SN, to, Log)
 			if err != nil {
 				Log.Error("GetNowPrice : %v", err)
+				return
 			}
 			message = append(message, imageMsg)
 			service.ReplyMessage(to, message, Log)
