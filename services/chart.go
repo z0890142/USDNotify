@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/sirupsen/logrus"
@@ -29,6 +30,7 @@ func GetChart(SN int, to string, Log *logrus.Entry) (*linebot.ImageMessage, erro
 	} else {
 		Log.Info(out.String())
 	}
-	message = linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+out.String()+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
+	fielName := strings.Replace(out.String(), "\n", "", -1)
+	message = linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+fielName+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
 	return message, nil
 }
