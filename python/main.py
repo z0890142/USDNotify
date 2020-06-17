@@ -42,7 +42,6 @@ try:
 
     # 取回全部的資料
     records = cursor.fetchall()
-    print("資料筆數：", cursor.rowcount)
 
     # 列出查詢的資料
     for (Price,Date) in records:
@@ -57,7 +56,6 @@ finally:
     if (connection.is_connected()):
         cursor.close()
         connection.close()
-        print("資料庫連線已關閉")
 
 end = datetime.date.today() #開始時間結束時間,選取最近一年的資料
 start =  end-relativedelta(years=1)
