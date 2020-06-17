@@ -47,20 +47,26 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 					err := DB.CheclUserExist(to)
 					if err != nil {
 						Log.Error(err)
-						service.ReplyMessage(replyToken, "訂閱失敗", Log)
+						message := []linebot.SendingMessage{linebot.NewTextMessage("訂閱失敗")}
+						service.ReplyMessage(replyToken, message, Log)
 						return
 					}
 					err = DB.InsertSubscribeMember(name, to)
 					if err != nil && strings.Contains(err.Error(), "sql: no rows in result set") {
 						Log.Error(err)
-						service.ReplyMessage(replyToken, "重複訂閱", Log)
+						message := []linebot.SendingMessage{linebot.NewTextMessage("重複訂閱")}
+
+						service.ReplyMessage(replyToken, message, Log)
 						return
 					} else if err != nil {
 						Log.Error(err)
-						service.ReplyMessage(replyToken, "訂閱失敗", Log)
+						message := []linebot.SendingMessage{linebot.NewTextMessage("訂閱失敗")}
+
+						service.ReplyMessage(replyToken, message, Log)
 						return
 					}
-					service.ReplyMessage(replyToken, "訂閱成功", Log)
+					message := []linebot.SendingMessage{linebot.NewTextMessage("訂閱成功")}
+					service.ReplyMessage(replyToken, message, Log)
 				} else if strings.Contains(message.Text, "歷年") {
 					replyToken := event.ReplyToken
 					name := strings.Split(message.Text, " ")[1]
@@ -71,7 +77,8 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 					} else if queryType == "賣價" {
 						foreignCurrency.GetSellPriceRecord(name, replyToken, Log)
 					} else {
-						service.ReplyMessage(replyToken, "抱歉我聽不懂你在講什麼", Log)
+						message := []linebot.SendingMessage{linebot.NewTextMessage("抱歉我聽不懂你在講什麼")}
+						service.ReplyMessage(replyToken, message, Log)
 					}
 
 				} else {

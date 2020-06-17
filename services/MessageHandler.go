@@ -17,8 +17,8 @@ func PushMessage(to string, payload string, Log *logrus.Entry) {
 	}
 }
 
-func ReplyMessage(replyToken string, payload string, Log *logrus.Entry) {
-	if _, err := bot.ReplyMessage(replyToken, linebot.NewTextMessage(payload)).Do(); err != nil {
+func ReplyMessage(replyToken string, payload []linebot.SendingMessage, Log *logrus.Entry) {
+	if _, err := bot.ReplyMessage(replyToken, payload...).Do(); err != nil {
 		Log.Error(err)
 	}
 }

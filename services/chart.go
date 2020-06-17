@@ -10,7 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetChart(SN int, to string, Log *logrus.Entry) {
+func GetChart(SN int, to string, Log *logrus.Entry) (*linebot.ImageMessage, error) {
+	var message *linebot.ImageMessage
 	displayName := DB.GetNameBySN(SN)
 	//relative path of main.go or ABSOLUTE_PATH
 	cmd := exec.Command("python3", "./python/main.py", displayName, strconv.Itoa(SN))
@@ -24,12 +25,10 @@ func GetChart(SN int, to string, Log *logrus.Entry) {
 		Log.WithFields(logrus.Fields{
 			"Error": stderr.String(),
 		}).Error("GetChart Error")
-		return
+		return message, err
 	} else {
 		Log.Info(out.String())
 	}
-	message := linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+displayName+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
-	if _, err := bot.ReplyMessage(to, message).Do(); err != nil {
-		Log.Error(err)
-	}
+	message = linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+displayName+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
+	return message, nil
 }

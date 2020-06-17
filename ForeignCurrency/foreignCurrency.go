@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/robfig/cron"
 
 	"github.com/sirupsen/logrus"
@@ -267,8 +268,15 @@ func GetNowPrice(name string, to string, Log *logrus.Entry) {
 			msg := foreignCurrency.DisplayName + "\n 銀行即期賣價 : " + fmt.Sprintf("%v", foreignCurrency.Now_sell) +
 				"\n 銀行即期買價 : " + fmt.Sprintf("%v", foreignCurrency.Now_buyIn) +
 				"\n 更新時間 : " + foreignCurrency.UpdateTime
-			service.ReplyMessage(to, msg, Log)
-			service.GetChart(foreignCurrency.SN, to, Log)
+
+			message := []linebot.SendingMessage{linebot.NewTextMessage(msg)}
+
+			imageMsg, err := service.GetChart(foreignCurrency.SN, to, Log)
+			if err != nil {
+				Log.Error("GetNowPrice : %v", err)
+			}
+			message = append(message, imageMsg)
+			service.ReplyMessage(to, message, Log)
 
 		}
 	}
@@ -289,8 +297,9 @@ func GetBuyInPriceRecord(name string, to string, Log *logrus.Entry) {
 				" 日期 : " + foreignCurrency.ThirdMonth_Heigest_Date +
 				"\n 銀行15日最高買價 : " + fmt.Sprintf("%v", foreignCurrency.Heigest) +
 				" 日期 : " + foreignCurrency.Heigest_Date
+			message := []linebot.SendingMessage{linebot.NewTextMessage(msg)}
 
-			service.ReplyMessage(to, msg, Log)
+			service.ReplyMessage(to, message, Log)
 
 		}
 	}
@@ -312,8 +321,9 @@ func GetSellPriceRecord(name string, to string, Log *logrus.Entry) {
 				"\n 銀行15日最低買價 : " + fmt.Sprintf("%v", foreignCurrency.Lowest) +
 				" 日期 : " + foreignCurrency.Lowest_Date
 
-			service.ReplyMessage(to, msg, Log)
+			message := []linebot.SendingMessage{linebot.NewTextMessage(msg)}
 
+			service.ReplyMessage(to, message, Log)
 		}
 	}
 }
