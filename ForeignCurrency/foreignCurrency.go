@@ -309,17 +309,17 @@ func GetBuyInPriceRecord(name string, to string, Log *logrus.Entry) {
 func GetSellPriceRecord(name string, to string, Log *logrus.Entry) {
 	for _, foreignCurrency := range ForeignCurrencyMap {
 		if strings.Contains(foreignCurrency.DisplayName, strings.ToUpper(name)) {
-			msg := "銀行五年最低買價 : " + fmt.Sprintf("%v", foreignCurrency.FiveYear_Lowest) +
+			msg := "銀行五年最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.FiveYear_Lowest) +
 				" 日期 : " + foreignCurrency.FiveYear_Lowest_Date +
-				"\n 銀行三年最低買價 : " + fmt.Sprintf("%v", foreignCurrency.ThirdYear_Lowest) +
+				"\n 銀行三年最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.ThirdYear_Lowest) +
 				" 日期 : " + foreignCurrency.ThirdYear_Lowest_Date +
-				"\n 銀行一年最低買價 : " + fmt.Sprintf("%v", foreignCurrency.OneYear_Lowest) +
+				"\n 銀行一年最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.OneYear_Lowest) +
 				" 日期 : " + foreignCurrency.OneYear_Lowest_Date +
-				"\n 銀行半年最低買價 : " + fmt.Sprintf("%v", foreignCurrency.SixMonth_Lowest) +
+				"\n 銀行半年最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.SixMonth_Lowest) +
 				" 日期 : " + foreignCurrency.SixMonth_Lowest_Date +
-				"\n 銀行三個月最低買價 : " + fmt.Sprintf("%v", foreignCurrency.ThirdMonth_Lowest) +
+				"\n 銀行三個月最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.ThirdMonth_Lowest) +
 				" 日期 : " + foreignCurrency.ThirdMonth_Lowest_Date +
-				"\n 銀行15日最低買價 : " + fmt.Sprintf("%v", foreignCurrency.Lowest) +
+				"\n 銀行15日最低賣價 : " + fmt.Sprintf("%v", foreignCurrency.Lowest) +
 				" 日期 : " + foreignCurrency.Lowest_Date
 
 			message := []linebot.SendingMessage{linebot.NewTextMessage(msg)}
