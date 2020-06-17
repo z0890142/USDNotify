@@ -30,7 +30,7 @@ func GetChart(SN int, to string, Log *logrus.Entry) (*linebot.ImageMessage, erro
 	} else {
 		Log.Info(out.String())
 	}
-	fielName := strings.Replace(out.String(), "\n", "", -1)
-	message = linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+fielName+".jpg", "https://skecg.asuscomm.com:80/picture/"+displayName+".jpg")
+	fileName := strings.Replace(out.String(), "\n", "", -1)
+	message = linebot.NewImageMessage("https://skecg.asuscomm.com:80/picture/"+fileName+".jpg", "https://skecg.asuscomm.com:80/picture/"+fileName+".jpg")
 	return message, nil
 }
