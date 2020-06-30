@@ -4,5 +4,3 @@
 *.log
 config/*
 static/*
-updatePrice.sh
-update.sh

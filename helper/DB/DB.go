@@ -56,8 +56,12 @@ func GetForeignCurrencyList() (list []int, nameList []string, dispalyNameList []
 func GetForeignCurrencyRecord(SN int) (recordList model.ForeignCurrencyRecord, err error) {
 	sqlString := "select 15_Lowest,15_Heigest,3Month_Lowest,3Month_Heigest,6Month_Lowest,6Month_Heigest," +
 		"1Year_Lowest,1Year_Heigest,3Year_Lowest,3Year_Heigest,5Year_Lowest,5Year_Heigest," +
-		"15_Lowest_Date,15_Heigest_Date,3Month_Lowest_Date,3Month_Heigest_Date,6Month_Lowest_Date,6Month_Heigest_Date," +
-		"1Year_Lowest_Date,1Year_Heigest_Date,3Year_Lowest_Date,3Year_Heigest_Date,5Year_Lowest_Date,5Year_Heigest_Date " +
+		"DATE_FORMAT(15_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(15_Heigest_Date,\"%Y-%m-%d\")," +
+		"DATE_FORMAT(3Month_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(3Month_Heigest_Date,\"%Y-%m-%d\")," +
+		"DATE_FORMAT(6Month_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(6Month_Heigest_Date,\"%Y-%m-%d\")," +
+		"DATE_FORMAT(1Year_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(1Year_Heigest_Date,\"%Y-%m-%d\")," +
+		"DATE_FORMAT(3Year_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(3Year_Heigest_Date,\"%Y-%m-%d\")," +
+		"DATE_FORMAT(5Year_Lowest_Date,\"%Y-%m-%d\"),DATE_FORMAT(5Year_Heigest_Date,\"%Y-%m-%d\") " +
 		"from ForeignCurrencyRecord " +
 		"where SN=?"
 	db.QueryRow(sqlString, SN).Scan(
